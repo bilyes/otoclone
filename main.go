@@ -31,6 +31,7 @@ func main() {
     ignoreList := []string{"4913"}
 
     for {
+        fmt.Println("Watching", foldersToWatch)
         watcher := exec.Command("inotifywait", "-r", "-e", "modify,create,delete,move", foldersToWatch)
         stdout, err := watcher.Output()
 
@@ -79,14 +80,6 @@ func process(event []string, ignoreList []string, folders []string, remotes []st
         if err := copy.Run(); err != nil {
             log.Panic(err)
         }
-
-        //stdout, err := copy.Output()
-
-        //if err != nil {
-            //fmt.Println("Error:",  err)
-            //os.Exit(1)
-        //}
-        //fmt.Println(string(stdout))
     }
 
     fmt.Println("Backed up", folder)
