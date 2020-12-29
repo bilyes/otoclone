@@ -7,10 +7,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"otoclone/fsnotify"
+	"otoclone/rclone"
 )
+
 
 func main() {
 
@@ -32,53 +35,38 @@ func main() {
 
     for {
         fmt.Println("Watching", foldersToWatch)
-        watcher := exec.Command("inotifywait", "-r", "-e", "modify,create,delete,move", foldersToWatch)
-        stdout, err := watcher.Output()
+        event, err := fsnotify.Watch(folders)
 
         if err != nil {
             fmt.Println("Error:",  err)
             os.Exit(1)
         }
 
-        process(parseINotifyEvent(stdout), ignoreList, folders, remotes)
+        process(event, ignoreList, folders, remotes)
     }
 }
 
-func parseINotifyEvent(output []byte) []string {
-    event := strings.Split(string(output), " ")
-    event[2] = strings.TrimSuffix(event[2], "\n")
-
-    return event
-}
-
-func process(event []string, ignoreList []string, folders []string, remotes []string) {
-    if contains(ignoreList, event[2]) { return }
+func process(event fsnotify.FSEvent, ignoreList []string, folders []string, remotes []string) {
+    if contains(ignoreList, event.File) { return }
 
     folder := ""
 
     for _, f := range folders {
-        if strings.HasPrefix(event[0], f) {
+        if strings.HasPrefix(event.Folder, f) {
             folder = f
             break
         }
     }
 
     if folder == "" {
-        fmt.Println("Error: Unwatched file or folder", event[0])
+        fmt.Println("Error: Unwatched file or folder", event.Folder)
         return
     }
 
     for _, r := range remotes {
-        remoteBucket := r + ":" + filepath.Base(folder)
-
-        //fmt.Println("running rclone copy -v", folder, remoteBucket)
-        copy := exec.Command("rclone", "copy", "-v", folder, remoteBucket)
-
-        copy.Stdout = os.Stdout
-        copy.Stderr = os.Stderr
-
-        if err := copy.Run(); err != nil {
-            log.Panic(err)
+        err := rclone.Copy(folder, r, filepath.Base(folder))
+        if err != nil {
+            log.Fatal(err)
         }
     }
 
@@ -86,19 +74,15 @@ func process(event []string, ignoreList []string, folders []string, remotes []st
 }
 
 func validateRemotes(remotes []string) {
-    listRemotes := exec.Command("rclone", "listremotes")
-    stdout, err := listRemotes.Output()
+    for _, r := range remotes {
+        isValid, err := rclone.RemoteIsValid(r)
+        if err != nil {
+            fmt.Println("Error:",  err)
+            os.Exit(1)
+        }
 
-    if err != nil {
-        fmt.Println("Error:",  err)
-        os.Exit(1)
-    }
-
-    configuredRemotes := strings.Split(string(stdout), ":\n")
-
-    for _, remote := range remotes {
-        if !contains(configuredRemotes, remote) {
-            fmt.Print("Error: Unknown remote ", remote)
+        if !isValid {
+            fmt.Print("Error: Unknown remote ", r)
             fmt.Println(". To configure it run: rclone config")
             os.Exit(1)
         }
