@@ -1,6 +1,10 @@
 # OtoClone
 
-An automatic backup and sync tool
+An automatic backup and sync utility that watches directories. It listens to
+filesystem events on these directories and copies their content to remote
+destination. These destinations can be a folder on the local filesystem, a
+network drive mounted on the filesystem, or a bucket on a cloud storage
+provider. See the list of supported providers [here](https://rclone.org/#providers). 
 
 ## Compatibility
 Linux
@@ -59,7 +63,54 @@ copy the binary into `~/.local/bin/`. If this is your case, make sure
          - S3
        ignoreList:
          - ignore-me.txt
+
+     photos:
+       path: /home/jim/photos
+       strategy: copy
+       remotes:
+         - GoogleDrive
    ```
 
 ## Keep Alive
-WIP
+
+`systemd` can be used on Linux to run `otoclone` as a service on boot and
+restart it if it ever fails. Here's an example of how to accomplish this.
+
+1. Add a systemd service file to manage `otoclone` under `/etc/systemd/system/`.
+   You can name it `otoclone.service` for example.
+   ```
+   otoclone.service
+   ----------------
+   
+   [Unit]
+   Description=Automatic backup
+   After=network.target
+
+   [Service]
+   Type=simple
+   # Another Type: forking
+   User=jim
+   WorkingDirectory=/home/jim
+   ExecStart=otoclone
+   Restart=on-failure
+   # Other restart options: always, on-abort, etc
+
+   # The install section is needed to use
+   # `systemctl enable` to start on boot
+   # For a user service that you want to enable
+   # and start automatically, use `default.target`
+   # For system level services, use `multi-user.target`
+   [Install]
+   WantedBy=default.target
+   ```
+2. Enable the service using: `systemctl enable otoclone`
+3. Start the service using: `systemctl start otoclone`
+
+If everything is configured properly you should see the `otoclone` service
+active when you run: `systemctl status otoclone`
+
+Like any other systemd service the logs can be found in `journalclt` 
+```
+journalctl -u otoclone
+```
+
