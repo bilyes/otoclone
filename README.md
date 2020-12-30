@@ -34,10 +34,32 @@ copy the binary into `~/.local/bin/`. If this is your case, make sure
 
 ## Configuration
 
-- Make sure `inotify-tools` is installed
-- Install `rclone`. To verify if it's installed, run `rclone --version`
-- Configure your remotes (backup destinations) in rclone: `rclone config`
-For more details on how to install and configure rclone check out [their website](https://rclone.org/).
+1. Make sure `inotify-tools` is installed
+
+2. Install `rclone`. To verify if it's installed, run `rclone --version`
+
+3. Configure your remotes (backup destinations) in rclone: `rclone config`. For
+   more details on how to install and configure rclone check out [their website](https://rclone.org/).
+
+4. Create configuration file for otoclone called `config.yml` in
+   `$XDG_CONFIG_HOME/otoclone`. If you don't have `$XDG_CONFIG_HOME`, put the
+   configuration file in `$HOME/.config/otoclone`.
+
+   ```
+   config.yml
+   ----------
+   
+   folders:
+     documents:
+       path: /home/jim/documents
+       strategy: copy
+       remotes:
+         - Dropbox
+         - OneDrive
+         - S3
+       ignoreList:
+         - ignore-me.txt
+   ```
 
 ## Keep Alive
 WIP
