@@ -4,34 +4,43 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"otoclone/config"
 	"otoclone/fsnotify"
 	"otoclone/rclone"
 )
 
-
 func main() {
 
-    if len(os.Args) < 3 {
-        fmt.Println("Missing argument. Usage: otoclone FOLDERS REMOTES")
+    var configFile string
+    flag.StringVar(&configFile, "f", "", "Path to the configuration file")
+    flag.Parse()
+
+    var foldersConfig map[string]config.FolderConfig
+    var err error
+
+    if configFile != "" {
+        foldersConfig, err = config.LoadFile(configFile)
+    } else {
+        foldersConfig, err = config.Load()
+    }
+
+    if err != nil {
+        fmt.Println("Error:",  err)
         os.Exit(1)
     }
 
-    folders := strings.Split(os.Args[1], ",")
-    validateFolders(folders)
+    validate(foldersConfig)
 
-    remotes := strings.Split(os.Args[2], ",")
-    validateRemotes(remotes)
-
+    folders := extractFolders(foldersConfig)
     foldersToWatch := strings.Join(folders, " ")
 
-    // TODO read from config file
-    ignoreList := []string{"4913"}
 
     for {
         fmt.Println("Watching", foldersToWatch)
@@ -42,38 +51,59 @@ func main() {
             os.Exit(1)
         }
 
-        process(event, ignoreList, folders, remotes)
+        process(event, foldersConfig)
     }
 }
 
-func process(event fsnotify.FSEvent, ignoreList []string, folders []string, remotes []string) {
-    if contains(ignoreList, event.File) { return }
+func extractFolders(foldersConfig map[string]config.FolderConfig) []string {
+    fKeys := map[string]bool{}
+    var folders []string
 
-    folder := ""
+    for _, f := range foldersConfig {
+        if _, value := fKeys[f.Path]; !value {
+            fKeys[f.Path] = true
+            folders = append(folders, f.Path)
+        }
+    }
 
+    return folders
+}
+
+func validate(foldersConfig map[string]config.FolderConfig) {
+    fKeys := map[string]bool{}
+    var folders []string
+
+    rKeys := map[string]bool{}
+    var remotes []string
+
+    // Extract folders and remotes
+    for _, f := range foldersConfig {
+        if _, value := fKeys[f.Path]; !value {
+            fKeys[f.Path] = true
+            folders = append(folders, f.Path)
+        }
+        for _, r := range f.Remotes {
+            if _, value := rKeys[r]; !value {
+                rKeys[r] = true
+                remotes = append(remotes, r)
+            }
+        }
+    }
+
+    // Validate folders
     for _, f := range folders {
-        if strings.HasPrefix(event.Folder, f) {
-            folder = f
-            break
+        if result, err := exists(f); !result {
+            if err == nil {
+                fmt.Println("Error: No such directory", f)
+            } else {
+                fmt.Println("Error:", err)
+
+            }
+            os.Exit(1)
         }
     }
 
-    if folder == "" {
-        fmt.Println("Error: Unwatched file or folder", event.Folder)
-        return
-    }
-
-    for _, r := range remotes {
-        err := rclone.Copy(folder, r, filepath.Base(folder))
-        if err != nil {
-            log.Fatal(err)
-        }
-    }
-
-    fmt.Println("Backed up", folder)
-}
-
-func validateRemotes(remotes []string) {
+    // Validate remotes
     for _, r := range remotes {
         isValid, err := rclone.RemoteIsValid(r)
         if err != nil {
@@ -89,25 +119,41 @@ func validateRemotes(remotes []string) {
     }
 }
 
+func process(event fsnotify.FSEvent, folders map[string]config.FolderConfig) {
+    var subject config.FolderConfig
+
+    for _, f := range folders {
+        if strings.HasPrefix(event.Folder, f.Path) {
+            subject = f
+            break
+        }
+    }
+
+    if subject.Path == "" {
+        fmt.Println("Error: Unwatched file or folder", event.Folder)
+        return
+    }
+
+    if contains(subject.IgnoreList, event.File) {
+        fmt.Println("Ignoring", event.File)
+        return
+    }
+
+    for _, r := range subject.Remotes {
+        err := rclone.Copy(subject.Path, r, filepath.Base(subject.Path))
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+
+    fmt.Println("Backed up", subject.Path)
+}
+
 func contains(arr []string, str string) bool {
     for _, i := range arr {
         if i == str { return true }
     }
     return false
-}
-
-func validateFolders(folders []string) {
-    for _, folder := range folders {
-        if result, err := exists(folder); !result {
-            if err == nil {
-                fmt.Println("Error: No such directory", folder)
-            } else {
-                fmt.Println("Error:", err)
-
-            }
-            os.Exit(1)
-        }
-    }
 }
 
 func exists(path string) (bool, error) {

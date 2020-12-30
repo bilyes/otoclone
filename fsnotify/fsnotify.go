@@ -17,8 +17,14 @@ type FSEvent struct {
 
 // Sets a filesystem watcher on a given set of folders
 func Watch(folders []string) (FSEvent, error) {
-    foldersToWatch := strings.Join(folders, " ")
-    watcher := exec.Command("inotifywait", "-r", "-e", "modify,create,delete,move", foldersToWatch)
+    args := []string{
+        "-r",
+        "-e",
+        "modify,create,delete,move",
+    }
+    args = append(args, folders...)
+
+    watcher := exec.Command("inotifywait", args...)
     stdout, err := watcher.Output()
 
     if err != nil {
