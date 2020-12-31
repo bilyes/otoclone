@@ -71,7 +71,8 @@ copy the binary into `~/.local/bin/`. If this is your case, make sure
        path: /home/jim/photos
        strategy: copy
        remotes:
-         - GoogleDrive
+         - name: GoogleDrive
+           bucket: Pix
    ```
 
 ## Keep Alive
