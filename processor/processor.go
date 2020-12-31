@@ -5,7 +5,6 @@ package processor
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"otoclone/config"
@@ -14,7 +13,7 @@ import (
 )
 
 // Handles a FSNotify Event
-func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bool) (string, error) {
+func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bool) (string, []error) {
     var subject config.Folder
 
     for _, f := range folders {
@@ -25,21 +24,23 @@ func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bo
     }
 
     if subject.Path == "" {
-        return "", &UnwatchedError{event.Folder}
+        return "", []error{&UnwatchedError{event.Folder}}
     }
 
     if contains(subject.IgnoreList, event.File) {
         return "", nil
     }
 
+    var errors []error = nil
+
     for _, r := range subject.Remotes {
-        err := rclone.Copy(subject.Path, r, filepath.Base(subject.Path), verbose)
+        err := rclone.Copy(subject.Path, r.Name, r.Bucket, verbose)
         if err != nil {
-            return "", err
+            errors = append(errors, err)
         }
     }
 
-    return subject.Path, nil
+    return subject.Path, errors
 }
 
 type UnwatchedError struct {
@@ -49,7 +50,6 @@ type UnwatchedError struct {
 func (e *UnwatchedError) Error() string {
         return fmt.Sprintf("Unwatched file or directory %s", e.Subject)
 }
-
 
 func contains(arr []string, str string) bool {
     for _, i := range arr {

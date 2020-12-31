@@ -54,7 +54,15 @@ func handle(cmd *cobra.Command, args []string) {
             os.Exit(1)
         }
 
-        path, err := processor.Handle(event, folders, verbose)
+        path, errors := processor.Handle(event, folders, verbose)
+
+        if errors != nil {
+            fmt.Println("Errors:")
+            for e := range errors {
+                fmt.Println(e)
+            }
+            continue
+        }
 
         if path == "" {
             fmt.Println("Ignored", event.File)
@@ -70,7 +78,6 @@ func parseFlags(flags *pflag.FlagSet) {
 }
 
 func loadConfig(configFile string) map[string]config.Folder {
-
     var folders map[string]config.Folder
     var err error
 

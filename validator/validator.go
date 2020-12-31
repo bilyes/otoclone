@@ -16,7 +16,7 @@ func Examine(folders map[string]config.Folder) {
     var paths []string
 
     rKeys := map[string]bool{}
-    var remotes []string
+    var remotes []config.Remote
 
     // Extract folders and remotes
     for _, f := range folders {
@@ -25,8 +25,8 @@ func Examine(folders map[string]config.Folder) {
             paths = append(paths, f.Path)
         }
         for _, r := range f.Remotes {
-            if _, value := rKeys[r]; !value {
-                rKeys[r] = true
+            if _, value := rKeys[r.Name]; !value {
+                rKeys[r.Name] = true
                 remotes = append(remotes, r)
             }
         }
@@ -36,9 +36,9 @@ func Examine(folders map[string]config.Folder) {
     validateRemotes(remotes)
 }
 
-func validateRemotes(remotes []string) {
+func validateRemotes(remotes []config.Remote) {
     for _, r := range remotes {
-        isValid, err := rclone.RemoteIsValid(r)
+        isValid, err := rclone.RemoteIsValid(r.Name)
         if err != nil {
             fmt.Println("Error:",  err)
             os.Exit(1)

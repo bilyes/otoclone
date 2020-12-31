@@ -7,10 +7,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Remote struct {
+    Name string
+    Bucket string
+}
+
 type Folder struct {
     Path string
     Strategy string
-    Remotes []string
+    Remotes []Remote
     IgnoreList []string
 }
 

@@ -58,9 +58,12 @@ copy the binary into `~/.local/bin/`. If this is your case, make sure
        path: /home/jim/documents
        strategy: copy
        remotes:
-         - Dropbox
-         - OneDrive
-         - S3
+         - name: Dropbox
+           bucket: documents
+         - name: OneDrive
+           bucket: docs
+         - name: S3
+           bucket: Documents
        ignoreList:
          - ignore-me.txt
 
