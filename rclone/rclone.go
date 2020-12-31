@@ -13,9 +13,15 @@ var cmd string = "rclone"
 var remotes []string
 
 // Copies the content of a folder into a remote bucket
-func Copy(folder string, remote string, bucket string) error {
+func Copy(folder string, remote string, bucket string, verbose bool) error {
 
-    copy := exec.Command(cmd, "copy", "-v", folder, remote + ":" + bucket)
+    args := []string{"copy"}
+    if verbose {
+        args = append(args, "-v")
+    }
+    args = append(args, folder, remote + ":" + bucket)
+
+    copy := exec.Command(cmd, args...)
 
     copy.Stdout = os.Stdout
     copy.Stderr = os.Stderr

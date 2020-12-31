@@ -14,7 +14,7 @@ import (
 )
 
 // Handles a FSNotify Event
-func Handle(event fsnotify.FSEvent, folders map[string]config.Folder) (string, error) {
+func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bool) (string, error) {
     var subject config.Folder
 
     for _, f := range folders {
@@ -33,7 +33,7 @@ func Handle(event fsnotify.FSEvent, folders map[string]config.Folder) (string, e
     }
 
     for _, r := range subject.Remotes {
-        err := rclone.Copy(subject.Path, r, filepath.Base(subject.Path))
+        err := rclone.Copy(subject.Path, r, filepath.Base(subject.Path), verbose)
         if err != nil {
             return "", err
         }

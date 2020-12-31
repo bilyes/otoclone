@@ -16,7 +16,9 @@ import (
 )
 
 func main() {
-    folders := loadConfig()
+    configFile, verbose := parseFlags()
+
+    folders := loadConfig(configFile)
     validator.Examine(folders)
 
     paths := extractPaths(folders)
@@ -31,7 +33,7 @@ func main() {
             os.Exit(1)
         }
 
-        path, err := processor.Handle(event, folders)
+        path, err := processor.Handle(event, folders, verbose)
 
         if path == "" {
             fmt.Println("Ignored", event.File)
@@ -41,10 +43,17 @@ func main() {
     }
 }
 
-func loadConfig() map[string]config.Folder {
+func parseFlags() (string, bool) {
     var configFile string
+    var verbose bool
     flag.StringVar(&configFile, "f", "", "Path to the configuration file")
+    flag.BoolVar(&verbose, "v", false, "Increase verbosity")
     flag.Parse()
+
+    return configFile, verbose
+}
+
+func loadConfig(configFile string) map[string]config.Folder {
 
     var folders map[string]config.Folder
     var err error
@@ -72,7 +81,6 @@ func extractPaths(folders map[string]config.Folder) []string {
             paths = append(paths, f.Path)
         }
     }
-
     return paths
 }
 

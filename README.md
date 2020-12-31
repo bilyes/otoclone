@@ -27,12 +27,12 @@ go build -o otoclone
 
 #### Install the binary
 
-Add the binary to `/usr/bin`
+Add the binary to `/usr/local/bin`
 ```
-sudo mv otoclone /usr/bin
+sudo mv otoclone /usr/local/bin
 ```
 
-If you don't have root privileges or you choose not to touch `/usr/bin`, you can
+If you don't have root privileges or you choose not to touch `/usr/local/bin`, you can
 copy the binary into `~/.local/bin/`. If this is your case, make sure
 `~/.local/bin` is part of your `$PATH` env variable.
 
@@ -42,7 +42,7 @@ copy the binary into `~/.local/bin/`. If this is your case, make sure
 
 2. Install `rclone`. To verify if it's installed, run `rclone --version`
 
-3. Configure your remotes (backup destinations) in rclone: `rclone config`. For
+3. Configure your remotes (backup destinations) in rclone by running `rclone config`. For
    more details on how to install and configure rclone check out [their website](https://rclone.org/).
 
 4. Create configuration file for otoclone called `config.yml` in
