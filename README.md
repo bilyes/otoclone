@@ -56,7 +56,7 @@ copy the binary into `~/.local/bin/`. If this is your case, make sure
    folders:
      documents:
        path: /home/jim/documents
-       strategy: copy
+       strategy: sync
        remotes:
          - name: Dropbox
            bucket: documents
