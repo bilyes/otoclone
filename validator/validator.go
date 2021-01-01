@@ -8,7 +8,10 @@ import (
 	"os"
 	"otoclone/config"
 	"otoclone/rclone"
+	"strings"
 )
+
+var strategies = []string{"copy", "sync"}
 
 // Validate a map of Folders
 func Examine(folders map[string]config.Folder) {
@@ -20,6 +23,11 @@ func Examine(folders map[string]config.Folder) {
 
     // Extract folders and remotes
     for _, f := range folders {
+        if !contains(strategies, f.Strategy) {
+            fmt.Println("Error: Unknown backup strategy", f.Strategy)
+            fmt.Println("Supported strategies are:", strings.Join(strategies, ", "))
+            os.Exit(1)
+        }
         if _, value := pKeys[f.Path]; !value {
             pKeys[f.Path] = true
             paths = append(paths, f.Path)
@@ -31,7 +39,6 @@ func Examine(folders map[string]config.Folder) {
             }
         }
     }
-
     validatePaths(paths)
     validateRemotes(remotes)
 }
@@ -73,3 +80,9 @@ func exists(path string) (bool, error) {
     return false, err
 }
 
+func contains(arr []string, str string) bool {
+    for _, i := range arr {
+        if i == str { return true }
+    }
+    return false
+}

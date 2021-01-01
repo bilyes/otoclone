@@ -34,7 +34,16 @@ func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bo
     var errors []error = nil
 
     for _, r := range subject.Remotes {
-        err := rclone.Copy(subject.Path, r.Name, r.Bucket, verbose)
+        var err error
+        // TODO Use switch case
+        if subject.Strategy == "copy" {
+            err = rclone.Copy(subject.Path, r.Name, r.Bucket, verbose)
+        } else if subject.Strategy == "sync" {
+            err = rclone.Sync(subject.Path, r.Name, r.Bucket, verbose)
+        } else {
+            // TODO Return a custom error here
+            fmt.Println("Unsupported backup strategy")
+        }
         if err != nil {
             errors = append(errors, err)
         }
