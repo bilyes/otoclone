@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
     Short: "Otoclone is an automatic backup and sync utility",
     Long: `A backup and sync utility that automatically reacts to filesystem
     events and copies watched folders to various remotes.`,
-    Run: handle,
+    Run: watch,
 }
 
 func Execute() {
@@ -38,7 +38,7 @@ func Execute() {
     }
 }
 
-func handle(cmd *cobra.Command, args []string) {
+func watch(cmd *cobra.Command, args []string) {
     folders := loadConfig(configFile)
     validator.Examine(folders)
 

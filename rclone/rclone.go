@@ -34,11 +34,9 @@ func RemoteIsValid(remote string) (bool, error) {
         remotes = strings.Split(string(stdout), ":\n")
     }
 
-
     if !contains(remotes, remote) {
         return false, nil
     }
-
     return true, nil
 }
 
@@ -57,7 +55,6 @@ func transfer(strategy string, folder string, remote string, bucket string, verb
     if err := copy.Run(); err != nil {
         return err
     }
-
     return nil
 }
 

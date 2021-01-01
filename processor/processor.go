@@ -35,14 +35,13 @@ func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bo
 
     for _, r := range subject.Remotes {
         var err error
-        // TODO Use switch case
-        if subject.Strategy == "copy" {
+        switch subject.Strategy {
+        case "copy":
             err = rclone.Copy(subject.Path, r.Name, r.Bucket, verbose)
-        } else if subject.Strategy == "sync" {
+        case "sync":
             err = rclone.Sync(subject.Path, r.Name, r.Bucket, verbose)
-        } else {
-            // TODO Return a custom error here
-            fmt.Println("Unsupported backup strategy")
+        default:
+            err = &UnknownBackupStrategyError{subject.Strategy}
         }
         if err != nil {
             errors = append(errors, err)
@@ -52,12 +51,20 @@ func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bo
     return subject.Path, errors
 }
 
+type UnknownBackupStrategyError struct {
+    Strategy string
+}
+
+func (e *UnknownBackupStrategyError) Error() string {
+    return fmt.Sprintf("Unsupported backup strategy %s", e.Strategy)
+}
+
 type UnwatchedError struct {
-        Subject string
+    Subject string
 }
 
 func (e *UnwatchedError) Error() string {
-        return fmt.Sprintf("Unwatched file or directory %s", e.Subject)
+    return fmt.Sprintf("Unwatched file or directory %s", e.Subject)
 }
 
 func contains(arr []string, str string) bool {
