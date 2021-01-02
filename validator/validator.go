@@ -6,9 +6,10 @@ package validator
 import (
 	"fmt"
 	"os"
+
 	"otoclone/config"
+	"otoclone/processor"
 	"otoclone/rclone"
-	"strings"
 )
 
 var strategies = []string{"copy", "sync"}
@@ -16,7 +17,7 @@ var strategies = []string{"copy", "sync"}
 // Validate a map of Folders.
 // Check if the paths exist on the filesystem, the backup
 // strategies are supported and the remotes are all configured.
-func Examine(folders map[string]config.Folder) {
+func Examine(folders map[string]config.Folder) []error {
     pKeys := map[string]bool{}
     var paths []string
 
@@ -45,22 +46,48 @@ func Examine(folders map[string]config.Folder) {
             }
         }
     }
-    validateStrategies(strats)
-    validatePaths(paths)
-    validateRemotes(remotes)
+
+    var errors []error
+
+    if err := validateStrategies(strats); err != nil {
+        errors = append(errors, err)
+    }
+    if err := validatePaths(paths); err != nil {
+        errors = append(errors, err)
+    }
+    if err:= validateRemotes(remotes); err != nil {
+        errors = append(errors, err)
+    }
+
+    return errors
 }
 
-func validateStrategies(strats []string) {
+type UnknownRemote struct {
+    Remote string
+}
+
+func (e *UnknownRemote) Error() string {
+    return fmt.Sprintf("Unknown remote %s", e.Remote)
+}
+
+type NoSuchDirectoryError struct {
+    Path string
+}
+
+func (e *NoSuchDirectoryError) Error() string {
+    return fmt.Sprintf("No such directory %s", e.Path)
+}
+
+func validateStrategies(strats []string) error {
     for _, s := range strats {
         if !contains(strategies, s) {
-            fmt.Println("Error: Unknown backup strategy", s)
-            fmt.Println("Supported strategies are:", strings.Join(strategies, ", "))
-            os.Exit(1)
+            return &processor.UnknownBackupStrategyError{Strategy: s}
         }
     }
+    return nil
 }
 
-func validateRemotes(remotes []config.Remote) {
+func validateRemotes(remotes []config.Remote) error {
     for _, r := range remotes {
         isValid, err := rclone.RemoteIsValid(r.Name)
         if err != nil {
@@ -69,24 +96,24 @@ func validateRemotes(remotes []config.Remote) {
         }
 
         if !isValid {
-            fmt.Print("Error: Unknown remote ", r)
-            fmt.Println(". To configure it run: rclone config")
-            os.Exit(1)
+            return &UnknownRemote{r.Name}
         }
     }
+     return nil
 }
 
-func validatePaths(paths []string) {
+func validatePaths(paths []string) error {
     for _, p := range paths {
         if ok, err := exists(p); !ok {
             if err == nil {
-                fmt.Println("Error: No such directory", p)
+                return &NoSuchDirectoryError{p}
             } else {
                 fmt.Println("Error:", err)
+                os.Exit(1)
             }
-            os.Exit(1)
         }
     }
+    return nil
 }
 
 // Check if a path exists on the filesystem

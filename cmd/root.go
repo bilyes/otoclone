@@ -1,3 +1,6 @@
+// Author: Ilyess Bachiri
+// Copyright (c) 2020-present Ilyess Bachiri
+
 package cmd
 
 import (
@@ -40,7 +43,14 @@ func Execute() {
 
 func watch(cmd *cobra.Command, args []string) {
     folders := loadConfig(configFile)
-    validator.Examine(folders)
+    errs := validator.Examine(folders)
+
+    if errs != nil {
+        for _, e := range errs {
+            fmt.Println("Error:", e)
+            os.Exit(1)
+        }
+    }
 
     paths := extractPaths(folders)
     foldersToWatch := strings.Join(paths, " ")
