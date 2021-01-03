@@ -7,34 +7,21 @@ network drive mounted on the filesystem, or a bucket on a cloud storage
 provider. See the list of supported providers [here](https://rclone.org/#providers). 
 
 ## Compatibility
+
 Linux
 
-## Requirements
+## Dependencies
+
 - [rclone](https://github.com/rclone/rclone)
 - inotify-tools
 
 ## Installation
 
-### Build from source
-
-#### Download the source code and build the binary
-
+The only repository supported for now is the AUR. To install `otoclone` on Arch
+linux, use any AUR helper of your choice. Example with `yay`:
 ```
-git clone https://github.com/ilyessbachiri/otoclone
-cd otoclone/
-go build -o otoclone
+yay -S otoclone
 ```
-
-#### Install the binary
-
-Add the binary to `/usr/local/bin`
-```
-sudo mv otoclone /usr/local/bin
-```
-
-If you don't have root privileges or you choose not to touch `/usr/local/bin`, you can
-copy the binary into `~/.local/bin/`. If this is your case, make sure
-`~/.local/bin` is part of your `$PATH` env variable.
 
 ## Configuration
 
@@ -74,6 +61,27 @@ copy the binary into `~/.local/bin/`. If this is your case, make sure
          - name: GoogleDrive
            bucket: Pix
    ```
+
+## Build from source
+
+#### Download the source code and build the binary
+
+```
+git clone https://github.com/ilyessbachiri/otoclone
+cd otoclone/
+go build -o otoclone
+```
+
+#### Install the binary
+
+Add the binary to `/usr/local/bin`
+```
+sudo mv otoclone /usr/local/bin
+```
+
+If you don't have root privileges or you choose not to touch `/usr/local/bin`, you can
+copy the binary into `~/.local/bin/`. If this is your case, make sure
+`~/.local/bin` is part of your `$PATH` env variable.
 
 ## Keep Alive
 
