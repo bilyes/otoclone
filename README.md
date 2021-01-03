@@ -62,22 +62,12 @@ yay -S otoclone
            bucket: Pix
    ```
 
-| Field        | Required? | Description                                    | Example                 |
-|--------------|-----------|------------------------------------------------|-------------------------|
-| `path`       | Yes       | The path of the folder to watch                | `home/jim/documents`    |
-| `strategy`   | Yes       | The backup strategy to use. Currently          | `copy`                  |
-|              |           | there are 2 supported strategies:              |                         |
-|              |           | `copy` and `sync`                              |                         |
-| `remotes`    | Yes       | The remote destination to tranfer data         | `- name: Dropbox`       |
-|              |           | to. Two fields are required for the remote:    | `  bucket: backup/docs` |
-|              |           | - `name`: the name of the remote as defined    |                         |
-|              |           | in rclone. To list configured remotes, run     |                         |
-|              |           | `rclone listremotes`                           |                         |
-|              |           | - `bucket`: the path of the destination        |                         |
-|              |           | folder on the remote.                          |                         |
-| `ignoreList` | No        | A list of files whose filesystem events should | `- file1.lock`          |
-|              |           | be ignored. These files **are not** ignored    |                         |
-|              |           | during backup however.                         |                         |
+| Field        | Required? | Description                                                                                                                                                                                                                                                     | Example              |
+|--------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|
+| `path`       | Yes       | The path of the folder to watch                                                                                                                                                                                                                                 | `home/jim/documents` |
+| `strategy`   | Yes       | The backup strategy to use. Currently <br>there are 2 supported strategies: `copy` and `sync`                                                                                                                                                                   | `copy`               |
+| `remotes`    | Yes       | The remote destination to tranfer data to.<br>Two fields are required for the remote: - `name`: the name of the remote as defined in rclone. To list configured remotes, run `rclone listremotes` - `bucket`: the path of the destination folder on the remote. | `- name: Dropbox`    |
+| `ignoreList` | No        | A list of files whose filesystem events should<br> be ignored. These files **are not** ignored during backup however.                                                                                                                                           | `- file1.lock`       |
 
 
 ## Build from source
