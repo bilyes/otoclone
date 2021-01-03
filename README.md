@@ -2,7 +2,7 @@
 
 An automatic backup and sync utility that watches directories. It listens to
 filesystem events on these directories and copies their content to remote
-destination. These destinations can be a folder on the local filesystem, a
+destinations. A remote destination can be a folder on the local filesystem, a
 network drive mounted on the filesystem, or a bucket on a cloud storage
 provider. See the list of supported providers [here](https://rclone.org/#providers). 
 
@@ -17,7 +17,7 @@ Linux
 
 ## Installation
 
-The only repository supported for now is the AUR. To install `otoclone` on Arch
+The only repository supported for now is the [AUR](https://aur.archlinux.org/otoclone.git). To install `otoclone` on Arch
 linux, use any AUR helper of your choice. Example with `yay`:
 ```
 yay -S otoclone
@@ -61,6 +61,24 @@ yay -S otoclone
          - name: GoogleDrive
            bucket: Pix
    ```
+
+| Field        | Required? | Description                                    | Example                 |
+|--------------|-----------|------------------------------------------------|-------------------------|
+| `path`       | Yes       | The path of the folder to watch                | `home/jim/documents`    |
+| `strategy`   | Yes       | The backup strategy to use. Currently          | `copy`                  |
+|              |           | there are 2 supported strategies:              |                         |
+|              |           | `copy` and `sync`                              |                         |
+| `remotes`    | Yes       | The remote destination to tranfer data         | `- name: Dropbox`       |
+|              |           | to. Two fields are required for the remote:    | `  bucket: backup/docs` |
+|              |           | - `name`: the name of the remote as defined    |                         |
+|              |           | in rclone. To list configured remotes, run     |                         |
+|              |           | `rclone listremotes`                           |                         |
+|              |           | - `bucket`: the path of the destination        |                         |
+|              |           | folder on the remote.                          |                         |
+| `ignoreList` | No        | A list of files whose filesystem events should | `- file1.lock`          |
+|              |           | be ignored. These files **are not** ignored    |                         |
+|              |           | during backup however.                         |                         |
+
 
 ## Build from source
 
