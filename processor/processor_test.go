@@ -7,8 +7,6 @@ import (
 	"otoclone/fsnotify"
 )
 
-var tempFolder = "tmp"
-
 func TestHandleIgnoreList(t *testing.T) {
     folders := buildForlders([]string{"ignoreme.txt"}, "copy")
 
