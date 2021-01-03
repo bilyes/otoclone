@@ -14,12 +14,25 @@ func TestExamineNoDirectory(t *testing.T) {
     setUp()
     defer tearDown()
 
-    folders := buildForlders()
+    folders := buildForlders("tmp/some/path", "copy", "Foo")
 
     errs := Examine(folders)
 
     if (errs == nil) {
         t.Error("Expected NoSuchDirectoryError error, got nil")
+    }
+}
+
+func TestExamineUnknownBackupStrategy(t *testing.T) {
+    setUp()
+    defer tearDown()
+
+    folders := buildForlders("tmp/some/path", "none", "Foo")
+
+    errs := Examine(folders)
+
+    if (errs == nil) {
+        t.Error("Expected UnknownBackupStrategy error, got nil")
     }
 }
 
@@ -29,7 +42,7 @@ func TestExamineUnknownRemote(t *testing.T) {
 
     os.MkdirAll(filepath.Join(tempFolder, "some", "path"), os.FileMode(0700))
 
-    folders := buildForlders()
+    folders := buildForlders("tmp/some/path", "copy", "Foo")
 
     errs := Examine(folders)
 
@@ -38,16 +51,15 @@ func TestExamineUnknownRemote(t *testing.T) {
     }
 }
 
-func buildForlders() map[string]config.Folder {
-    var folders map[string]config.Folder
-    folders = make(map[string]config.Folder)
+func buildForlders(path string, strat string, remote string) map[string]config.Folder {
+    folders := make(map[string]config.Folder)
 
     folders["f1"] = config.Folder{
-        Path: "tmp/some/path",
-        Strategy: "copy",
+        Path: path,
+        Strategy: strat,
         Remotes: []config.Remote{
             {
-                Name: "Foo",
+                Name: remote,
                 Bucket: "bar",
             },
         },
