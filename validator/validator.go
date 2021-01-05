@@ -10,6 +10,7 @@ import (
 	"otoclone/config"
 	"otoclone/processor"
 	"otoclone/rclone"
+	"otoclone/utils"
 )
 
 var strategies = []string{"copy", "sync"}
@@ -80,7 +81,7 @@ func (e *NoSuchDirectoryError) Error() string {
 
 func validateStrategies(strats []string) error {
     for _, s := range strats {
-        if !contains(strategies, s) {
+        if !utils.ArrayContains(strategies, s) {
             return &processor.UnknownBackupStrategyError{Strategy: s}
         }
     }
@@ -104,7 +105,7 @@ func validateRemotes(remotes []config.Remote) error {
 
 func validatePaths(paths []string) error {
     for _, p := range paths {
-        if ok, err := exists(p); !ok {
+        if ok, err := utils.PathExists(p); !ok {
             if err == nil {
                 return &NoSuchDirectoryError{p}
             } else {
@@ -114,19 +115,4 @@ func validatePaths(paths []string) error {
         }
     }
     return nil
-}
-
-// Check if a path exists on the filesystem
-func exists(path string) (bool, error) {
-    _, err := os.Stat(path)
-    if err == nil { return true, nil }
-    if os.IsNotExist(err) { return false, nil }
-    return false, err
-}
-
-func contains(arr []string, str string) bool {
-    for _, i := range arr {
-        if i == str { return true }
-    }
-    return false
 }

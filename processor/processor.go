@@ -10,6 +10,7 @@ import (
 	"otoclone/config"
 	"otoclone/fsnotify"
 	"otoclone/rclone"
+	"otoclone/utils"
 )
 
 // Handles a FSNotify Event
@@ -27,7 +28,7 @@ func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bo
         return "", []error{&UnwatchedError{event.Folder}}
     }
 
-    if contains(subject.IgnoreList, event.File) {
+    if utils.ArrayContains(subject.IgnoreList, event.File) {
         return "", nil
     }
 
@@ -71,11 +72,3 @@ type UnwatchedError struct {
 func (e *UnwatchedError) Error() string {
     return fmt.Sprintf("Unwatched file or directory %s", e.Subject)
 }
-
-func contains(arr []string, str string) bool {
-    for _, i := range arr {
-        if i == str { return true }
-    }
-    return false
-}
-
