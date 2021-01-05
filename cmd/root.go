@@ -68,7 +68,7 @@ func watch(cmd *cobra.Command, args []string) {
 
         if errors != nil {
             fmt.Println("Errors:")
-            for e := range errors {
+            for _, e := range errors {
                 fmt.Println(e)
             }
             continue

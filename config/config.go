@@ -17,6 +17,7 @@ type Folder struct {
     Strategy string
     Remotes []Remote
     IgnoreList []string
+    ExcludePattern string
 }
 
 var configPaths = []string{"$XDG_CONFIG_HOME/otoclone", "$HOME/.config/otoclone"}

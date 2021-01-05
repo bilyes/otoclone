@@ -31,15 +31,20 @@ func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bo
         return "", nil
     }
 
+    flags := rclone.Flags{
+        Verbose: verbose,
+        Exclude: subject.ExcludePattern,
+    }
+
     var errors []error = nil
 
     for _, r := range subject.Remotes {
         var err error
         switch subject.Strategy {
         case "copy":
-            err = rclone.Copy(subject.Path, r.Name, r.Bucket, verbose)
+            err = rclone.Copy(subject.Path, r.Name, r.Bucket, flags)
         case "sync":
-            err = rclone.Sync(subject.Path, r.Name, r.Bucket, verbose)
+            err = rclone.Sync(subject.Path, r.Name, r.Bucket, flags)
         default:
             err = &UnknownBackupStrategyError{subject.Strategy}
         }
