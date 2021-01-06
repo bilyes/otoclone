@@ -13,12 +13,16 @@ import (
 	"otoclone/utils"
 )
 
+type Validator struct {
+    Cloner rclone.Cloner
+}
+
 var strategies = []string{"copy", "sync"}
 
 // Validate a map of Folders.
 // Check if the paths exist on the filesystem, the backup
 // strategies are supported and the remotes are all configured.
-func Examine(folders map[string]config.Folder) []error {
+func (v *Validator) Examine(folders map[string]config.Folder) []error {
     pKeys := map[string]bool{}
     var paths []string
 
@@ -56,7 +60,7 @@ func Examine(folders map[string]config.Folder) []error {
     if err := validatePaths(paths); err != nil {
         errors = append(errors, err)
     }
-    if err:= validateRemotes(remotes); err != nil {
+    if err:= v.validateRemotes(remotes); err != nil {
         errors = append(errors, err)
     }
 
@@ -88,9 +92,9 @@ func validateStrategies(strats []string) error {
     return nil
 }
 
-func validateRemotes(remotes []config.Remote) error {
+func (v *Validator) validateRemotes(remotes []config.Remote) error {
     for _, r := range remotes {
-        isValid, err := rclone.RemoteIsValid(r.Name)
+        isValid, err := v.Cloner.RemoteIsValid(r.Name)
         if err != nil {
             fmt.Println("Error:",  err)
             os.Exit(1)

@@ -13,8 +13,12 @@ import (
 	"otoclone/utils"
 )
 
+type Processor struct {
+    Cloner rclone.Cloner
+}
+
 // Handles a FSNotify Event
-func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bool) (string, []error) {
+func (p *Processor) Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bool) (string, []error) {
     var subject config.Folder
 
     for _, f := range folders {
@@ -43,9 +47,9 @@ func Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bo
         var err error
         switch subject.Strategy {
         case "copy":
-            err = rclone.Copy(subject.Path, r.Name, r.Bucket, flags)
+            err = p.Cloner.Copy(subject.Path, r.Name, r.Bucket, flags)
         case "sync":
-            err = rclone.Sync(subject.Path, r.Name, r.Bucket, flags)
+            err = p.Cloner.Sync(subject.Path, r.Name, r.Bucket, flags)
         default:
             err = &UnknownBackupStrategyError{subject.Strategy}
         }

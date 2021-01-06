@@ -12,6 +12,14 @@ import (
 	"otoclone/utils"
 )
 
+type Cloner interface {
+    Copy(string, string, string, Flags) error
+    Sync(string, string, string, Flags) error
+    RemoteIsValid(string) (bool, error)
+}
+
+type Rclone struct {}
+
 type Flags struct {
     Verbose bool
     Exclude string
@@ -21,17 +29,17 @@ var cmd string = "rclone"
 var remotes []string
 
 // Copies the content of a folder into a remote bucket
-func Copy(folder string, remote string, bucket string, flags Flags) error {
+func (r *Rclone) Copy(folder string, remote string, bucket string, flags Flags) error {
     return transfer("copy", folder, remote, bucket, flags)
 }
 
 // Syncs the content of a source folder and a remote bucket
-func Sync(folder string, remote string, bucket string, flags Flags) error {
+func (r *Rclone) Sync(folder string, remote string, bucket string, flags Flags) error {
     return transfer("sync", folder, remote, bucket, flags)
 }
 
 // Checks if a given remote has been configured
-func RemoteIsValid(remote string) (bool, error) {
+func (r *Rclone) RemoteIsValid(remote string) (bool, error) {
     if len(remotes) == 0 {
         listRemotes := exec.Command(cmd, "listremotes")
         stdout, err := listRemotes.Output()

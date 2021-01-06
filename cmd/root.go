@@ -15,6 +15,7 @@ import (
 	"otoclone/fsnotify"
 	"otoclone/processor"
 	"otoclone/validator"
+	"otoclone/rclone"
 )
 
 var (
@@ -42,8 +43,12 @@ func Execute() {
 }
 
 func watch(cmd *cobra.Command, args []string) {
+    r := &rclone.Rclone{}
+    val := &validator.Validator{ Cloner: r}
+    proc := &processor.Processor{ Cloner: r}
+
     folders := loadConfig(configFile)
-    errs := validator.Examine(folders)
+    errs := val.Examine(folders)
 
     if errs != nil {
         for _, e := range errs {
@@ -64,7 +69,7 @@ func watch(cmd *cobra.Command, args []string) {
             os.Exit(1)
         }
 
-        path, errors := processor.Handle(event, folders, verbose)
+        path, errors := proc.Handle(event, folders, verbose)
 
         if errors != nil {
             fmt.Println("Errors:")
