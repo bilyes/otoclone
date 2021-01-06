@@ -5,6 +5,7 @@ import (
 
 	"otoclone/config"
 	"otoclone/fsnotify"
+	"otoclone/mocks"
 )
 
 func TestHandleIgnoreList(t *testing.T) {
@@ -16,7 +17,11 @@ func TestHandleIgnoreList(t *testing.T) {
         File: "ignoreme.txt",
     }
 
-    p, errs := Handle(event, folders, false)
+    mockCloner := &mocks.Cloner{}
+    mockCloner.On("RemoteIsValid", "Foo").Return(true, nil).Once()
+    testProc := &Processor{ Cloner: mockCloner }
+
+    p, errs := testProc.Handle(event, folders, false)
 
     if (errs != nil) {
         t.Errorf("No errors expected, got %v", errs)
@@ -36,7 +41,11 @@ func TestHandleUnknownBackupStrategy(t *testing.T) {
         File: "some-file",
     }
 
-    _, errs := Handle(event, folders, false)
+    mockCloner := &mocks.Cloner{}
+    mockCloner.On("RemoteIsValid", "Foo").Return(true, nil).Once()
+    testProc := &Processor{ Cloner: mockCloner }
+
+    _, errs := testProc.Handle(event, folders, false)
 
     if (errs == nil) {
         t.Error("Expected UnknownBackupStrategy error, got nil")
@@ -52,7 +61,11 @@ func TestHandleUnwatched(t *testing.T) {
         File: "some-file",
     }
 
-    _, errs := Handle(event, folders, false)
+    mockCloner := &mocks.Cloner{}
+    mockCloner.On("RemoteIsValid", "Foo").Return(true, nil).Once()
+    testProc := &Processor{ Cloner: mockCloner }
+
+    _, errs := testProc.Handle(event, folders, false)
 
     if (errs == nil) {
         t.Error("Expected Unwatched error, got nil")
