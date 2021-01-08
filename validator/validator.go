@@ -19,6 +19,8 @@ type Validator struct {
 
 var strategies = []string{"copy", "sync"}
 
+// TODO Create an ExamineOne function to validate a single Folder
+
 // Validate a map of Folders.
 // Check if the paths exist on the filesystem, the backup
 // strategies are supported and the remotes are all configured.

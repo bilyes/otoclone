@@ -36,15 +36,38 @@ func Load() (map[string]Folder, error) {
     return loadFrom(configPaths, "config")
 }
 
-// Load the configuration from the supported config locations
-func loadFrom(configPaths []string, configName string) (map[string]Folder, error) {
+// Write a Folder to the config file
+func Write(folder Folder) error {
+    setup([]string{"/tmp/play"}, "test")
 
+    fs := make(map[string]Folder)
+    fs[filepath.Base(folder.Path)] = folder
+
+    viper.Set("folders", fs)
+
+    // TODO create file if it doesn't exist
+    return viper.WriteConfig()
+}
+
+func setup(configPaths []string, configName string) {
     viper.SetConfigName(configName) // name of config file (without extension)
     viper.SetConfigType("yaml") // REQUIRED if the config file does not have the extension in the name
 
     for _, cp := range configPaths {
         viper.AddConfigPath(cp)
     }
+}
+
+// Load the configuration from the supported config locations
+func loadFrom(configPaths []string, configName string) (map[string]Folder, error) {
+
+    setup(configPaths, configName)
+    //viper.SetConfigName(configName) // name of config file (without extension)
+    //viper.SetConfigType("yaml") // REQUIRED if the config file does not have the extension in the name
+
+    //for _, cp := range configPaths {
+        //viper.AddConfigPath(cp)
+    //}
 
     var folders map[string]Folder
 
