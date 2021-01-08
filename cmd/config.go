@@ -4,12 +4,14 @@
 package cmd
 
 import (
-    "fmt"
+	"fmt"
 
-    "github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 
-    "otoclone/config"
+	"otoclone/config"
+	"otoclone/validator"
+	"otoclone/rclone"
 )
 
 func init() {
@@ -43,6 +45,16 @@ func configure(cmd *cobra.Command, args []string) {
             fmt.Println(err.Error())
             return
         }
+
+        val := &validator.Validator{ Cloner: &rclone.Rclone{} }
+        errs := val.ExamineOne(f)
+        if errs != nil && len(errs) > 0 {
+            for _, e := range errs {
+                fmt.Println(e.Error())
+            }
+            return
+        }
+
         // TODO confirm all is good
         if err := config.Write(f); err != nil {
             fmt.Println(err.Error())

@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"otoclone/utils"
 	"path/filepath"
 
 	"github.com/spf13/viper"
@@ -38,14 +40,30 @@ func Load() (map[string]Folder, error) {
 
 // Write a Folder to the config file
 func Write(folder Folder) error {
-    setup([]string{"/tmp/play"}, "test")
+    configPath := "/tmp/play"
+    configName := "test"
+
+    configFilePath := filepath.Join(configPath, configName + ".yml")
+
+    ok, err := utils.PathExists(configFilePath)
+    if err != nil {
+        return err
+    }
+    if !ok {
+        cnf, err := os.Create(configFilePath)
+        if err != nil {
+            return err
+        }
+        defer cnf.Close()
+    }
+
+    setup([]string{configPath},configName)
 
     fs := make(map[string]Folder)
     fs[filepath.Base(folder.Path)] = folder
 
     viper.Set("folders", fs)
 
-    // TODO create file if it doesn't exist
     return viper.WriteConfig()
 }
 

@@ -19,7 +19,24 @@ type Validator struct {
 
 var strategies = []string{"copy", "sync"}
 
-// TODO Create an ExamineOne function to validate a single Folder
+// Validate a Folder's properties
+// Check if the path exists on the filesystem, the backup
+// strategy is supported and the remotes are all configured.
+func (v *Validator) ExamineOne(folder config.Folder) []error {
+    var errors []error
+
+    if err := validateStrategy(folder.Strategy); err != nil {
+        errors = append(errors, err)
+    }
+    if err := validatePath(folder.Path); err != nil {
+        errors = append(errors, err)
+    }
+    if err:= v.validateRemotes(folder.Remotes); err != nil {
+        errors = append(errors, err)
+    }
+
+    return errors
+}
 
 // Validate a map of Folders.
 // Check if the paths exist on the filesystem, the backup
@@ -94,9 +111,17 @@ func validateStrategies(strats []string) error {
     return nil
 }
 
+func validateStrategy(strat string) error {
+    if !utils.ArrayContains(strategies, strat) {
+        return &processor.UnknownBackupStrategyError{Strategy: strat}
+    }
+    return nil
+}
+
 func (v *Validator) validateRemotes(remotes []config.Remote) error {
     for _, r := range remotes {
         isValid, err := v.Cloner.RemoteIsValid(r.Name)
+
         if err != nil {
             fmt.Println("Error:",  err)
             os.Exit(1)
@@ -106,19 +131,27 @@ func (v *Validator) validateRemotes(remotes []config.Remote) error {
             return &UnknownRemote{r.Name}
         }
     }
-     return nil
+    return nil
 }
 
 func validatePaths(paths []string) error {
     for _, p := range paths {
-        if ok, err := utils.PathExists(p); !ok {
-            if err == nil {
-                return &NoSuchDirectoryError{p}
-            } else {
-                fmt.Println("Error:", err)
-                os.Exit(1)
-            }
+        if err := validatePath(p); err != nil {
+            return err
         }
     }
     return nil
 }
+
+func validatePath(path string) error {
+    if ok, err := utils.PathExists(path); !ok {
+        if err == nil {
+            return &NoSuchDirectoryError{path}
+        } else {
+            fmt.Println("Error:", err)
+            os.Exit(1)
+        }
+    }
+    return nil
+}
+
