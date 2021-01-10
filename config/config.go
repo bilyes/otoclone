@@ -41,23 +41,31 @@ func Write(folder Folder) error {
     configPath := "/tmp/play"
     configName := "test"
 
-    configFilePath := filepath.Join(configPath, configName + ".yml")
-
-    ok, err := utils.PathExists(configFilePath)
+    // TODO change me into Load()
+    fs, err := loadFrom([]string{configPath}, configName)
     if err != nil {
-        return err
-    }
-    if !ok {
-        cnf, err := os.Create(configFilePath)
+        // TODO if error type different than config file not found
+        //return err
+
+        configFilePath := filepath.Join(configPath, configName + ".yml")
+
+        ok, err := utils.PathExists(configFilePath)
         if err != nil {
             return err
         }
-        defer cnf.Close()
+        if !ok {
+            cnf, err := os.Create(configFilePath)
+            if err != nil {
+                return err
+            }
+            defer cnf.Close()
+        }
     }
 
-    setup([]string{configPath},configName)
+    if fs == nil {
+        fs = make(map[string]Folder)
+    }
 
-    fs := make(map[string]Folder)
     fs[filepath.Base(folder.Path)] = folder
 
     viper.Set("folders", fs)
