@@ -26,7 +26,6 @@ var configPaths = []string{"$XDG_CONFIG_HOME/otoclone", "$HOME/.config/otoclone"
 
 // Load the configuration from a specific file
 func LoadFile(configPath string) (map[string]Folder, error) {
-
     configName := filepath.Base(configPath)
     configPaths := []string{filepath.Dir(configPath)}
 
@@ -34,7 +33,6 @@ func LoadFile(configPath string) (map[string]Folder, error) {
 }
 
 func Load() (map[string]Folder, error) {
-
     return loadFrom(configPaths, "config")
 }
 
@@ -78,14 +76,7 @@ func setup(configPaths []string, configName string) {
 
 // Load the configuration from the supported config locations
 func loadFrom(configPaths []string, configName string) (map[string]Folder, error) {
-
     setup(configPaths, configName)
-    //viper.SetConfigName(configName) // name of config file (without extension)
-    //viper.SetConfigType("yaml") // REQUIRED if the config file does not have the extension in the name
-
-    //for _, cp := range configPaths {
-        //viper.AddConfigPath(cp)
-    //}
 
     var folders map[string]Folder
 

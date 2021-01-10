@@ -13,14 +13,12 @@ func MakeFolder() (Folder, error) {
             Name:     "path",
             Prompt:   &survey.Input{Message: "Enter the folder path:"},
             Validate: survey.Required,
-            //Transform: survey.Title,
         },
         {
             Name: "strategy",
             Prompt: &survey.Select{
                 Message: "Choose a backup strategy:",
                 Options: []string{"copy", "sync"},
-                //Default: "copy",
             },
         },
     }
@@ -36,7 +34,7 @@ func MakeFolder() (Folder, error) {
     if err != nil {
         return Folder{}, err
     }
-    // TODO check if path exists
+    // TODO validate path, and strategy
 
     remotes, err := promptRemotes()
 
@@ -61,7 +59,6 @@ func promptExcludePattern() string {
     prompt := &survey.Select{
         Message: "Do you want to add a filename pattern to exclude from the backup?",
         Options: []string{"No", "Yes"},
-        //Default: "No",
     }
     survey.AskOne(prompt, &choice)
 
@@ -90,7 +87,6 @@ func promptRemotes() ([]Remote, error) {
         prompt := &survey.Select{
             Message: "Do you want to add another remote?",
             Options: []string{"No", "Yes"},
-            //Default: "No",
         }
 
         survey.AskOne(prompt, &choice)
@@ -100,7 +96,7 @@ func promptRemotes() ([]Remote, error) {
             if err != nil {
                 return nil, err
             }
-            // TODO
+            // TODO Validate remote
             remotes = append(remotes, r)
         }
     }
@@ -139,7 +135,6 @@ func promptIgnoreListItem() string {
 }
 
 func promptRemote() (Remote, error) {
-
     var qs = []*survey.Question{
         {
             Name:     "remote",
@@ -168,5 +163,4 @@ func promptRemote() (Remote, error) {
         Bucket: answers.Bucket,
     }, nil
 }
-
 
