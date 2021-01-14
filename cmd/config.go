@@ -71,9 +71,19 @@ func addFolder() {
         return
     }
 
-    // TODO confirm all is good
+    fmt.Println("Adding the following folder configuration:")
+    fmt.Printf("%+v\n", f)
+    choice := ""
+    prompt := &survey.Select{
+        Message: "Do you confirm?",
+        Options: []string{"Yes", "No"},
+    }
+    survey.AskOne(prompt, &choice)
+    if choice == "No" {
+        return
+    }
+
     if err := config.Write(f); err != nil {
         fmt.Println(err.Error())
-        return
     }
 }
