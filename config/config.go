@@ -22,8 +22,7 @@ type Folder struct {
     ExcludePattern string
 }
 
-//var configPaths = []string{"$XDG_CONFIG_HOME/otoclone", "$HOME/.config/otoclone"}
-var configPaths = []string{"/tmp/play"}
+var configPaths = []string{"$XDG_CONFIG_HOME/otoclone", "$HOME/.config/otoclone"}
 var configName = "config"
 
 // Load the configuration from a specific file
@@ -124,7 +123,6 @@ func loadFrom(configPaths []string, configName string) (map[string]Folder, error
 
     err := viper.ReadInConfig()
     if err != nil {
-        //return folders, fmt.Errorf("Fatal error config file: %s \n", err)
         return folders, err
     }
 
