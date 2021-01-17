@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"otoclone/utils"
 	"path/filepath"
 
 	"github.com/spf13/viper"
@@ -21,10 +23,10 @@ type Folder struct {
 }
 
 var configPaths = []string{"$XDG_CONFIG_HOME/otoclone", "$HOME/.config/otoclone"}
+var configName = "config"
 
 // Load the configuration from a specific file
 func LoadFile(configPath string) (map[string]Folder, error) {
-
     configName := filepath.Base(configPath)
     configPaths := []string{filepath.Dir(configPath)}
 
@@ -32,25 +34,96 @@ func LoadFile(configPath string) (map[string]Folder, error) {
 }
 
 func Load() (map[string]Folder, error) {
-
-    return loadFrom(configPaths, "config")
+    return loadFrom(configPaths, configName)
 }
 
-// Load the configuration from the supported config locations
-func loadFrom(configPaths []string, configName string) (map[string]Folder, error) {
+// Write a Folder to the config file
+func Write(folder Folder) error {
+    fs, err := Load()
 
+    if err != nil {
+        // Return the error if it's not a viper.ConfigFileNotFoundError
+        if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+            return err
+        }
+
+        if err := createConfigFile(); err != nil {
+            return err
+        }
+    }
+
+    if fs == nil {
+        fs = make(map[string]Folder)
+    }
+
+    fs[filepath.Base(folder.Path)] = folder
+
+    viper.Set("folders", fs)
+
+    return viper.WriteConfig()
+}
+
+func createConfigFile() error {
+    configPath, err := selectConfigPath()
+
+    if err != nil {
+        return err
+    }
+
+    configFilePath := filepath.Join(configPath, configName + ".yml")
+
+    ok, err := utils.PathExists(configFilePath)
+    if err != nil {
+        return err
+    }
+
+    if !ok {
+        cnf, err := os.Create(configFilePath)
+        if err != nil {
+            return err
+        }
+        defer cnf.Close()
+    }
+
+    return nil
+}
+
+func selectConfigPath() (string, error) {
+    for _, p := range configPaths {
+        ok, err := utils.PathExists(p)
+
+        if err != nil {
+            return "", err
+        }
+
+        if ok {
+            return p, nil
+        }
+    }
+
+    // TODO Return a proper error type and display instructions
+    // explaining how to fix
+    return "", fmt.Errorf("No valid path found for the configuration")
+}
+
+func setup(configPaths []string, configName string) {
     viper.SetConfigName(configName) // name of config file (without extension)
     viper.SetConfigType("yaml") // REQUIRED if the config file does not have the extension in the name
 
     for _, cp := range configPaths {
         viper.AddConfigPath(cp)
     }
+}
+
+// Load the configuration from the supported config locations
+func loadFrom(configPaths []string, configName string) (map[string]Folder, error) {
+    setup(configPaths, configName)
 
     var folders map[string]Folder
 
     err := viper.ReadInConfig()
     if err != nil {
-        return folders, fmt.Errorf("Fatal error config file: %s \n", err)
+        return folders, err
     }
 
     err = viper.UnmarshalKey("folders", &folders)
