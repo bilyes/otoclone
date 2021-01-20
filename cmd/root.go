@@ -24,7 +24,7 @@ var (
 )
 
 func init() {
-    parseFlags(rootCmd.Flags())
+    parseFlags(rootCmd.PersistentFlags())
 }
 
 var rootCmd = &cobra.Command{
@@ -43,19 +43,9 @@ func Execute() {
 }
 
 func watch(cmd *cobra.Command, args []string) {
-    r := &rclone.Rclone{}
-    val := &validator.Validator{ Cloner: r}
-    proc := &processor.Processor{ Cloner: r}
+    folders := loadFolders()
 
-    folders := loadConfig(configFile)
-    errs := val.Examine(folders)
-
-    if errs != nil {
-        for _, e := range errs {
-            fmt.Println("Error:", e)
-            os.Exit(1)
-        }
-    }
+    proc := &processor.Processor{ Cloner: &rclone.Rclone{} }
 
     paths := extractPaths(folders)
     foldersToWatch := strings.Join(paths, " ")
@@ -90,6 +80,23 @@ func watch(cmd *cobra.Command, args []string) {
 func parseFlags(flags *pflag.FlagSet) {
     flags.BoolVarP(&verbose, "verbose", "v", false, "Verbose logging")
     flags.StringVarP(&configFile, "config", "c", "", "Path to the configuration file")
+}
+
+func loadFolders() map[string]config.Folder {
+    r := &rclone.Rclone{}
+    val := &validator.Validator{ Cloner: r }
+
+    folders := loadConfig(configFile)
+    errs := val.Examine(folders)
+
+    if errs != nil {
+        for _, e := range errs {
+            fmt.Println("Error:", e)
+        }
+        os.Exit(1)
+    }
+
+    return folders
 }
 
 func loadConfig(configFile string) map[string]config.Folder {
