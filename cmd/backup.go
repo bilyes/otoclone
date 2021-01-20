@@ -24,7 +24,7 @@ func init() {
 var backupCmd = &cobra.Command{
     Use: "backup",
     Short: "Run a one time backup",
-    Long: `Execute a backup of all the folders defined in the configuration and exit`,
+    Long: `Execute a backup of one or all of the folders defined in the configuration and exit`,
     Run: backup,
 }
 
@@ -36,7 +36,7 @@ func backup(cmd *cobra.Command, args []string) {
     if folder != "" {
         folders = extractFolder(folders, folder)
         if len(folders) == 0 {
-            fmt.Printf("Folder %s not found. To add it to the configuration run: otoclone config", folder)
+            fmt.Printf("Folder %s not found in the configuration. To add it run: otoclone config", folder)
             os.Exit(1)
         }
     }
