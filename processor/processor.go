@@ -44,6 +44,7 @@ func (p *Processor) Handle(event fsnotify.FSEvent, folders map[string]config.Fol
     return subject.Path, p.Backup(flds, verbose)
 }
 
+// Backup a list of folders
 func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []error {
     var errors []error = nil
 
