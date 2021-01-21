@@ -19,7 +19,8 @@ Linux
 
 The only repository supported for now is the [AUR](https://aur.archlinux.org/otoclone.git). To install `otoclone` on Arch
 linux, use any AUR helper of your choice. Example with `yay`:
-```
+
+```sh
 yay -S otoclone
 ```
 
@@ -32,9 +33,13 @@ yay -S otoclone
 3. Configure your remotes (backup destinations) in rclone by running `rclone config`. For
    more details on how to install and configure rclone check out [their website](https://rclone.org/).
 
-4. Create configuration file for otoclone called `config.yml` in
-   `$XDG_CONFIG_HOME/otoclone`. If you don't have `$XDG_CONFIG_HOME`, put the
-   configuration file in `$HOME/.config/otoclone`.
+4. Configure Otoclone with the command `otoclone config`. This will create a
+   configuration file called `config.yml` in `$XDG_CONFIG_HOME/otoclone`. (or in
+   `$HOME/.config/otoclone` if you don't have `$XDG_CONFIG_HOME` set)
+
+### Configuration File Details
+
+The configuration file has the following structure:
 
    ```
    config.yml
@@ -100,6 +105,7 @@ restart it if it ever fails. Here's an example of how to accomplish this.
 
 1. Add a systemd service file to manage `otoclone` under `/etc/systemd/system/`.
    You can name it `otoclone.service` for example.
+
    ```
    otoclone.service
    ----------------
@@ -125,14 +131,16 @@ restart it if it ever fails. Here's an example of how to accomplish this.
    [Install]
    WantedBy=default.target
    ```
+
 2. Enable the service using: `systemctl enable otoclone`
 3. Start the service using: `systemctl start otoclone`
 
 If everything is configured properly you should see the `otoclone` service
 active when you run: `systemctl status otoclone`
 
-Like any other systemd service the logs can be found in `journalclt` 
-```
+Like any other systemd service the logs can be found in `journalclt`:
+
+```sh
 journalctl -u otoclone
 ```
 

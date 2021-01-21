@@ -37,7 +37,7 @@ func Load() (map[string]Folder, error) {
     return loadFrom(configPaths, configName)
 }
 
-// Write a Folder to the config file
+// Write a Folder to the default config file
 func Write(folder Folder) error {
     fs, err := Load()
 
@@ -52,13 +52,28 @@ func Write(folder Folder) error {
         }
     }
 
-    if fs == nil {
-        fs = make(map[string]Folder)
+    return writeFolder(folder, fs)
+}
+
+// Write a Folder to a custom config file
+func WriteTo(folder Folder, configFile string) error {
+    fs, err := LoadFile(configFile)
+
+    if err != nil {
+        return err
     }
 
-    fs[filepath.Base(folder.Path)] = folder
+    return writeFolder(folder, fs)
+}
 
-    viper.Set("folders", fs)
+func writeFolder(folder Folder, folders map[string]Folder) error {
+    if folders == nil {
+        folders = make(map[string]Folder)
+    }
+
+    folders[filepath.Base(folder.Path)] = folder
+
+    viper.Set("folders", folders)
 
     return viper.WriteConfig()
 }

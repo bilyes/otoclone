@@ -10,8 +10,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"otoclone/config"
-	"otoclone/validator"
 	"otoclone/rclone"
+	"otoclone/utils"
+	"otoclone/validator"
 )
 
 func init() {
@@ -26,6 +27,20 @@ var configCmd = &cobra.Command{
 }
 
 func configure(cmd *cobra.Command, args []string) {
+    if configFile != "" {
+        ok, err := utils.PathExists(configFile)
+
+        if err != nil {
+            fmt.Println("Error:", err)
+            return
+        }
+
+        if !ok {
+            fmt.Println("The provided config file doesn't exist:", configFile)
+            return
+        }
+    }
+
     addF := "Add a new folder"
     //editF := "Edit an existing folder"
     //remF := "Remove an existing folder"
@@ -83,7 +98,13 @@ func addFolder() {
         return
     }
 
-    if err := config.Write(f); err != nil {
+    if configFile != "" {
+        err = config.WriteTo(f, configFile)
+    } else {
+        err = config.Write(f)
+    }
+
+    if err != nil {
         fmt.Println(err.Error())
     }
 }
