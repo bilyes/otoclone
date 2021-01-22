@@ -43,7 +43,7 @@ func configure(cmd *cobra.Command, args []string) {
 
     addF := "Add a new folder"
     //editF := "Edit an existing folder"
-    //remF := "Remove an existing folder"
+    remF := "Remove an existing folder"
     q := "Quit"
 
     choice := ""
@@ -52,7 +52,7 @@ func configure(cmd *cobra.Command, args []string) {
         Options: []string{
             addF,
             //editF,
-            //remF,
+            remF,
             q,
         },
     }
@@ -61,7 +61,8 @@ func configure(cmd *cobra.Command, args []string) {
     switch choice {
     case addF:
         addFolder()
-    //case remF:
+    case remF:
+        deleteFolder()
     //case editF:
     case q:
         fmt.Println("Bye.")
@@ -88,7 +89,7 @@ func addFolder() {
 
     fmt.Println("Adding the following folder configuration:")
     fmt.Printf("%+v\n", f)
-    choice := ""
+    var choice string
     prompt := &survey.Select{
         Message: "Do you confirm?",
         Options: []string{"Yes", "No"},
@@ -107,4 +108,47 @@ func addFolder() {
     if err != nil {
         fmt.Println(err.Error())
     }
+}
+
+func deleteFolder() {
+    // List existing folder and prompt for selection
+    fols, err := config.Load()
+
+    if err != nil {
+        fmt.Println("Error:", err)
+    }
+
+    var keys []string
+    for k := range fols {
+        keys = append(keys, k)
+    }
+    var folder string
+
+    prompt := &survey.Select{
+        Message: "Which folder do you want to remove?",
+        Options: keys,
+    }
+    survey.AskOne(prompt, &folder)
+
+    // Prompt for confirmation
+    var choice string
+    prompt = &survey.Select{
+        Message: "Do you confirm?",
+        Options: []string{"Yes", "No"},
+    }
+    survey.AskOne(prompt, &choice)
+    if choice == "No" {
+        return
+    }
+
+    // delete selected folders
+    if configFile != "" {
+        err = config.RemoveFrom(folder, configFile)
+    } else {
+        err = config.Remove(folder)
+    }
+    if err != nil {
+        fmt.Println(err.Error())
+    }
+    // TODO TEST ME
 }
