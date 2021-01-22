@@ -112,7 +112,13 @@ func addFolder() {
 
 func deleteFolder() {
     // List existing folder and prompt for selection
-    fols, err := config.Load()
+    var fols map[string]config.Folder
+    var err error
+    if configFile != "" {
+        fols, err = config.LoadFile(configFile)
+    } else {
+        fols, err = config.Load()
+    }
 
     if err != nil {
         fmt.Println("Error:", err)
@@ -141,7 +147,7 @@ func deleteFolder() {
         return
     }
 
-    // delete selected folders
+    // delete selected folder
     if configFile != "" {
         err = config.RemoveFrom(folder, configFile)
     } else {
@@ -150,5 +156,4 @@ func deleteFolder() {
     if err != nil {
         fmt.Println(err.Error())
     }
-    // TODO TEST ME
 }
