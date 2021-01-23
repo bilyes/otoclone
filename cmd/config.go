@@ -42,7 +42,7 @@ func configure(cmd *cobra.Command, args []string) {
     }
 
     addF := "Add a new folder"
-    //editF := "Edit an existing folder"
+    editF := "Edit an existing folder"
     remF := "Remove an existing folder"
     q := "Quit"
 
@@ -51,7 +51,7 @@ func configure(cmd *cobra.Command, args []string) {
         Message: "What do you want to do?",
         Options: []string{
             addF,
-            //editF,
+            editF,
             remF,
             q,
         },
@@ -63,7 +63,8 @@ func configure(cmd *cobra.Command, args []string) {
         addFolder()
     case remF:
         deleteFolder()
-    //case editF:
+    case editF:
+        editFolder()
     case q:
         fmt.Println("Bye.")
     default:
@@ -156,4 +157,21 @@ func deleteFolder() {
     if err != nil {
         fmt.Println(err.Error())
     }
+}
+
+func editFolder() {
+    var loc string
+
+    if configFile != "" {
+        loc = configFile
+    } else {
+        var err error
+        loc, err = config.Location()
+        if err != nil {
+            fmt.Println("Error:", err)
+            return
+        }
+    }
+
+    fmt.Println("To make changes to the configuration, edit the config file", loc)
 }
