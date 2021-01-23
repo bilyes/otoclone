@@ -88,6 +88,14 @@ func RemoveFrom(folderName string, configFile string) error {
     return removeFolder(folderName, fs)
 }
 
+func Location() (string, error) {
+    p, err := selectConfigPath()
+    if err != nil {
+        return "", err
+    }
+    return filepath.Join(p, configName + ".yml"), nil
+}
+
 func removeFolder(folderName string, folders map[string]Folder) error {
     delete(folders, folderName)
 
@@ -109,13 +117,11 @@ func writeFolder(folder Folder, folders map[string]Folder) error {
 }
 
 func createConfigFile() error {
-    configPath, err := selectConfigPath()
+    configFilePath, err := Location()
 
     if err != nil {
         return err
     }
-
-    configFilePath := filepath.Join(configPath, configName + ".yml")
 
     ok, err := utils.PathExists(configFilePath)
     if err != nil {
@@ -134,7 +140,8 @@ func createConfigFile() error {
 }
 
 func selectConfigPath() (string, error) {
-    for _, p := range configPaths {
+    for _, pa := range configPaths {
+        p := os.ExpandEnv(pa)
         ok, err := utils.PathExists(p)
 
         if err != nil {
