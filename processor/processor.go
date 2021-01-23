@@ -6,6 +6,7 @@ package processor
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"otoclone/config"
 	"otoclone/fsnotify"
@@ -46,7 +47,9 @@ func (p *Processor) Handle(event fsnotify.FSEvent, folders map[string]config.Fol
 
 // Backup a list of folders
 func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []error {
-    var errors []error = nil
+    err := make(chan error)
+
+    var wg sync.WaitGroup
 
     for _, folder := range folders {
 
@@ -55,19 +58,31 @@ func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []err
             Exclude: folder.ExcludePattern,
         }
 
-        for _, r := range folder.Remotes {
-            var err error
-            switch folder.Strategy {
-            case "copy":
-                err = p.Cloner.Copy(folder.Path, r.Name, r.Bucket, flags)
-            case "sync":
-                err = p.Cloner.Sync(folder.Path, r.Name, r.Bucket, flags)
-            default:
-                err = &UnknownBackupStrategyError{folder.Strategy}
-            }
-            if err != nil {
-                errors = append(errors, err)
-            }
+        for _, remote := range folder.Remotes {
+            wg.Add(1)
+            go func(fol config.Folder, rem config.Remote, err chan<- error) {
+                defer wg.Done()
+                switch fol.Strategy {
+                case "copy":
+                    err <- p.Cloner.Copy(fol.Path, rem.Name, rem.Bucket, flags)
+                case "sync":
+                    err <- p.Cloner.Sync(fol.Path, rem.Name, rem.Bucket, flags)
+                default:
+                    err <- &UnknownBackupStrategyError{fol.Strategy}
+                }
+            }(folder, remote, err)
+        }
+    }
+
+    go func() {
+        wg.Wait()
+        close(err)
+    }()
+
+    var errors []error = nil
+    for e := range err {
+        if e != nil {
+            errors = append(errors, e)
         }
     }
 
