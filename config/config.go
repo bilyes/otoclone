@@ -66,6 +66,36 @@ func WriteTo(folder Folder, configFile string) error {
     return writeFolder(folder, fs)
 }
 
+// Remove a folder from the configuration
+func Remove(folderName string) error {
+    fs, err := Load()
+
+    if err != nil {
+        return err
+    }
+
+    return removeFolder(folderName, fs)
+}
+
+// Remove a folder from a custom config file
+func RemoveFrom(folderName string, configFile string) error {
+    fs, err := LoadFile(configFile)
+
+    if err != nil {
+        return err
+    }
+
+    return removeFolder(folderName, fs)
+}
+
+func removeFolder(folderName string, folders map[string]Folder) error {
+    delete(folders, folderName)
+
+    viper.Set("folders", folders)
+
+    return viper.WriteConfig()
+}
+
 func writeFolder(folder Folder, folders map[string]Folder) error {
     if folders == nil {
         folders = make(map[string]Folder)
