@@ -18,7 +18,7 @@ Linux
 ## Installation
 
 The only repository supported for now is the [AUR](https://aur.archlinux.org/otoclone.git). To install `otoclone` on Arch
-linux, use any AUR helper of your choice. Example with `yay`:
+Linux, use any AUR helper of your choice. Example with `yay`:
 
 ```sh
 yay -S otoclone
@@ -68,14 +68,26 @@ The configuration file has the following structure:
            bucket: Pix
    ```
 
-| Field            | Required? | Description                                                                                                                                                                                                                                                        | Example                                      |
-|------------------|:---------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| `path`           |    Yes    | The path of the folder to watch                                                                                                                                                                                                                                    | `home/jim/documents`                         |
-| `strategy`       |    Yes    | The backup strategy to use. Currently there are 2 supported strategies: `copy` and `sync`                                                                                                                                                                          | `copy`                                       |
-| `remotes`        |    Yes    | The remote destination to tranfer data to. Two fields are required for the remote:<br>- `name`: the name of the remote as defined in rclone. To list configured remotes, run `rclone listremotes`<br>- `bucket`: the path of the destination folder on the remote. | `name: Dropbox`<br><br>`bucket: backup/docs` |
-| `ignoreList`     |    No     | A list of files whose filesystem events should<br> be ignored. These files **are not** ignored during backup however.                                                                                                                                              | `file1.lock`                                 |
-| `excludePattern` |    No     | The pattern to exclude based on file globs as used by the unix shell. For more details see `rclone`'s [documentation](https://rclone.org/filtering/).                                                                                                              | `*.jpg`                                      |
+| Field            | Required? | Description                                                                                                                                                                                                                                                         | Example                                      |
+|------------------|:---------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| `path`           |    Yes    | The path of the folder to watch                                                                                                                                                                                                                                     | `home/jim/documents`                         |
+| `strategy`       |    Yes    | The backup strategy to use. Currently there are 2 supported strategies: `copy` and `sync`                                                                                                                                                                           | `copy`                                       |
+| `remotes`        |    Yes    | The remote destination to transfer data to. Two fields are required for the remote:<br>- `name`: the name of the remote as defined in rclone. To list configured remotes, run `rclone listremotes`<br>- `bucket`: the path of the destination folder on the remote. | `name: Dropbox`<br><br>`bucket: backup/docs` |
+| `ignoreList`     |    No     | A list of files whose filesystem events should<br> be ignored. These files **are not** ignored during backup however.                                                                                                                                               | `file1.lock`                                 |
+| `excludePattern` |    No     | The pattern to exclude based on file globs as used by the Unix shell. For more details see `rclone`'s [documentation](https://rclone.org/filtering/).                                                                                                              | `*.jpg`                                      |
 
+## Usage
+
+To start watching folders defined in the configuration for changes run:
+`otoclone`
+
+To execute a one time backup of a single folder run:
+```bash
+otoclone backup -f MY_FOLDER
+```
+Omitting the `-f` flag will backup all folders defined in the configuration
+
+For a list of all available commands and flags run: `otoclone -h`
 
 ## Build from source
 
