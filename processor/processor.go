@@ -6,12 +6,13 @@ package processor
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	"otoclone/config"
 	"otoclone/fsnotify"
 	"otoclone/rclone"
 	"otoclone/utils"
+
+    "github.com/bilyes/conman"
 )
 
 type Processor struct {
@@ -45,11 +46,29 @@ func (p *Processor) Handle(event fsnotify.FSEvent, folders map[string]config.Fol
     return subject.Path, p.Backup(flds, verbose)
 }
 
+type cloningTask struct {
+    cloner rclone.Cloner
+    source string
+    destinationPath string
+    destination string
+    flags rclone.Flags
+    strategy string
+}
+
+func (c *cloningTask) Execute() (interface{}, error) {
+    switch c.strategy {
+    case "copy":
+        return nil, c.cloner.Copy(c.source, c.destinationPath, c.destination, c.flags)
+    case "sync":
+        return nil, c.cloner.Sync(c.source, c.destinationPath, c.destination, c.flags)
+    default:
+        return nil,  &UnknownBackupStrategyError{c.strategy}
+    }
+}
+
 // Backup a list of folders
 func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []error {
-    err := make(chan error)
-
-    var wg sync.WaitGroup
+    cm := conman.New(100)
 
     for _, folder := range folders {
 
@@ -59,34 +78,22 @@ func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []err
         }
 
         for _, remote := range folder.Remotes {
-            wg.Add(1)
-            go func(fol config.Folder, rem config.Remote, err chan<- error) {
-                defer wg.Done()
-                switch fol.Strategy {
-                case "copy":
-                    err <- p.Cloner.Copy(fol.Path, rem.Name, rem.Bucket, flags)
-                case "sync":
-                    err <- p.Cloner.Sync(fol.Path, rem.Name, rem.Bucket, flags)
-                default:
-                    err <- &UnknownBackupStrategyError{fol.Strategy}
-                }
-            }(folder, remote, err)
+            cm.Run(
+                &cloningTask{
+                    cloner: p.Cloner,
+                    source: folder.Path,
+                    destinationPath: remote.Name,
+                    destination: remote.Bucket,
+                    flags: flags,
+                    strategy: folder.Strategy,
+                },
+            )
         }
     }
 
-    go func() {
-        wg.Wait()
-        close(err)
-    }()
+    cm.Wait()
 
-    var errors []error = nil
-    for e := range err {
-        if e != nil {
-            errors = append(errors, e)
-        }
-    }
-
-    return errors
+    return cm.Errors()
 }
 
 type UnknownBackupStrategyError struct {
