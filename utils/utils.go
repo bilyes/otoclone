@@ -3,7 +3,10 @@
 
 package utils
 
-import "os"
+import (
+	"os"
+	"slices"
+)
 
 // Check if a path exists on the filesystem
 func PathExists(path string) (bool, error) {
@@ -18,10 +21,5 @@ func PathExists(path string) (bool, error) {
 }
 
 func ArrayContains(arr []string, str string) bool {
-	for _, i := range arr {
-		if i == str {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(arr, str)
 }
