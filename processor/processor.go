@@ -55,7 +55,7 @@ type cloningTask struct {
 	strategy        string
 }
 
-func (c *cloningTask) Execute() (interface{}, error) {
+func (c *cloningTask) Execute() (any, error) {
 	switch c.strategy {
 	case "copy":
 		return nil, c.cloner.Copy(c.source, c.destinationPath, c.destination, c.flags)
