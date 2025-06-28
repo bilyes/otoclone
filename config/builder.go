@@ -4,7 +4,10 @@
 package config
 
 import (
-    "github.com/AlecAivazis/survey/v2"
+	"fmt"
+	"os"
+
+	"github.com/AlecAivazis/survey/v2"
 )
 
 func MakeFolder() (Folder, error) {
@@ -34,7 +37,13 @@ func MakeFolder() (Folder, error) {
     if err != nil {
         return Folder{}, err
     }
-    // TODO validate path, and strategy
+
+	if _, err := os.Stat(answers.Path); os.IsNotExist(err) {
+		return Folder{}, fmt.Errorf("The folder %s doesn't exist.", answers.Path)
+	}
+	if answers.Strategy != "copy" && answers.Strategy != "sync" {
+		return Folder{}, fmt.Errorf("The strategy %s is not supported.", answers.Strategy)
+	}
 
     remotes, err := promptRemotes()
 

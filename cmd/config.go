@@ -81,7 +81,7 @@ func addFolder() {
 
     val := &validator.Validator{ Cloner: &rclone.Rclone{} }
     errs := val.ExamineOne(f)
-    if errs != nil && len(errs) > 0 {
+    if len(errs) > 0 {
         for _, e := range errs {
             fmt.Println(e.Error())
         }
