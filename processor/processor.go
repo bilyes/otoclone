@@ -16,7 +16,8 @@ import (
 )
 
 type Processor struct {
-	Cloner rclone.Cloner
+	Concurrency int64
+	Cloner      rclone.Cloner
 }
 
 // Handles a FSNotify Event
@@ -68,7 +69,11 @@ func (c *cloningTask) Execute() (any, error) {
 
 // Backup a list of folders
 func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []error {
-	cm := conman.New(100)
+	concurrency := p.Concurrency
+	if concurrency <= 0 {
+		concurrency = 10
+	}
+	cm := conman.New[any](concurrency)
 
 	for _, folder := range folders {
 

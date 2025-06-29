@@ -2,8 +2,8 @@ github.com/AlecAivazis/survey/v2 v2.3.7 h1:6I/u8FvytdGsgonrYsVn2t8t4QiRnh6QSTqkk
 github.com/AlecAivazis/survey/v2 v2.3.7/go.mod h1:xUTIdE4KCOIjsBAE1JYsUPoCqYdZ1reCfTwbto0Fduo=
 github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2 h1:+vx7roKuyA63nhn5WAunQHLTznkw5W8b1Xc0dNjp83s=
 github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2/go.mod h1:HBCaDeC1lPdgDeDbhX8XFpy1jqjK0IBG8W5K+xYqA0w=
-github.com/bilyes/conman v0.0.0-20210425155702-f30ceb0a74cb h1:1Oy9GVvRNlf7h+JSJCV0WzvDX44sE4pKiU0+ieqvKZI=
-github.com/bilyes/conman v0.0.0-20210425155702-f30ceb0a74cb/go.mod h1:HbatgAQBXkvpaUMgGJQYsRy+96gaU6DK9Daf4ikuqJs=
+github.com/bilyes/conman v0.1.0 h1:3kj9tw96prnw38oznjFnCqnybCiCd0sUcqeBKe5EK0Q=
+github.com/bilyes/conman v0.1.0/go.mod h1:PRdS24dizRV2UebQYX2QUU4SkvudEeQhJOjxe0GBla0=
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
 github.com/creack/pty v1.1.17 h1:QeVUsEDNrLBW4tMgZHvxy18sKtr6VI492kBhUfhDJNI=
 github.com/creack/pty v1.1.17/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
