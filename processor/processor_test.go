@@ -19,7 +19,7 @@ func TestHandleIgnoreList(t *testing.T) {
 
 	mockCloner := &mocks.Cloner{}
 	mockCloner.On("RemoteIsValid", "Foo").Return(true, nil).Once()
-	testProc := &Processor{Cloner: mockCloner}
+	testProc := &Processor{Cloner: mockCloner, Concurrency: 1}
 
 	p, errs := testProc.Handle(event, folders, false)
 

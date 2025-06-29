@@ -19,8 +19,9 @@ import (
 )
 
 var (
-	configFile = ""
-	verbose    = false
+	configFile  = ""
+	verbose     = false
+	concurrency = int64(10)
 )
 
 func init() {
@@ -45,7 +46,7 @@ func Execute() {
 func watch(cmd *cobra.Command, args []string) {
 	folders := loadFolders()
 
-	proc := &processor.Processor{Cloner: &rclone.Rclone{}}
+	proc := &processor.Processor{Cloner: &rclone.Rclone{}, Concurrency: concurrency}
 
 	paths := extractPaths(folders)
 	foldersToWatch := strings.Join(paths, " ")
@@ -80,6 +81,7 @@ func watch(cmd *cobra.Command, args []string) {
 func parseFlags(flags *pflag.FlagSet) {
 	flags.BoolVarP(&verbose, "verbose", "v", false, "Verbose logging")
 	flags.StringVarP(&configFile, "config", "c", "", "Path to the configuration file")
+	flags.Int64VarP(&concurrency, "concurrency", "C", 10, "Number of concurrent backups to run")
 }
 
 func loadFolders() map[string]config.Folder {
