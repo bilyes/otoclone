@@ -1,5 +1,5 @@
-// Author: ilyess bachiri
-// Copyright (c) 2020-present ilyess bachiri
+// Author: Ilyess Bachiri
+// Copyright (c) 2020-present Ilyess Bachiri
 
 package fsnotify
 
