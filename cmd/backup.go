@@ -34,11 +34,13 @@ func backup(cmd *cobra.Command, args []string) {
 	proc := &processor.Processor{Cloner: &rclone.Rclone{}}
 
 	if folder != "" {
-		folders = extractFolder(folders, folder)
-		if len(folders) == 0 {
-			fmt.Printf("Folder %s not found in the configuration. To add it run: otoclone config", folder)
+		fol, ok := folders[folder]
+		if !ok {
+			fmt.Printf("Folder %s not found in the configuration. To add it, run: otoclone config", folder)
 			os.Exit(1)
 		}
+
+		folders = map[string]config.Folder{folder: fol}
 	}
 
 	if errs := proc.Backup(folders, verbose); len(errs) > 0 {
@@ -46,17 +48,4 @@ func backup(cmd *cobra.Command, args []string) {
 			fmt.Println("Error:", e)
 		}
 	}
-}
-
-func extractFolder(folders map[string]config.Folder, folder string) map[string]config.Folder {
-	fols := make(map[string]config.Folder)
-
-	for k, f := range folders {
-		if k == folder {
-			fols[k] = f
-			return fols
-		}
-	}
-
-	return fols
 }
