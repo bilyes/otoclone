@@ -69,9 +69,13 @@ func (c *cloningTask) Execute() (any, error) {
 
 // Backup a list of folders
 func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []error {
+	folderCount := len(folders)
+	if folderCount == 0 {
+		return nil
+	}
 	concurrency := p.Concurrency
 	if concurrency <= 0 {
-		concurrency = 10
+		concurrency = int64(folderCount)
 	}
 	cm := conman.New[any](concurrency)
 

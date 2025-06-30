@@ -21,7 +21,7 @@ import (
 var (
 	configFile  = ""
 	verbose     = false
-	concurrency = int64(10)
+	concurrency = int64(0)
 )
 
 func init() {
@@ -81,7 +81,13 @@ func watch(cmd *cobra.Command, args []string) {
 func parseFlags(flags *pflag.FlagSet) {
 	flags.BoolVarP(&verbose, "verbose", "v", false, "Verbose logging")
 	flags.StringVarP(&configFile, "config", "c", "", "Path to the configuration file")
-	flags.Int64VarP(&concurrency, "concurrency", "C", 10, "Number of concurrent backups to run")
+	flags.Int64VarP(
+		&concurrency,
+		"concurrency",
+		"C",
+		0,
+		"Number of concurrent backups to run. 0 sets the concurrency to the number of folders to backup.",
+	)
 }
 
 func loadFolders() map[string]config.Folder {
