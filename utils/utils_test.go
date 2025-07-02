@@ -10,18 +10,6 @@ import (
 
 var tempFolder = "tmp"
 
-func TestArrayContainsTrue(t *testing.T) {
-	r := ArrayContains([]string{"foo", "bar"}, "foo")
-
-	assert.Equal(t, r, true, "ArrayContains should have returned true")
-}
-
-func TestArrayContainsFalse(t *testing.T) {
-	r := ArrayContains([]string{"foo", "bar"}, "intruder")
-
-	assert.Equal(t, r, false, "ArrayContains should have returned false")
-}
-
 func TestPathExistsFalse(t *testing.T) {
 	setUp()
 	defer tearDown()

@@ -7,9 +7,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
-
-	"otoclone/utils"
 )
 
 type Cloner interface {
@@ -49,7 +48,7 @@ func (r *Rclone) RemoteIsValid(remote string) (bool, error) {
 		remotes = strings.Split(string(stdout), ":\n")
 	}
 
-	if !utils.ArrayContains(remotes, remote) {
+	if !slices.Contains(remotes, remote) {
 		return false, nil
 	}
 	return true, nil

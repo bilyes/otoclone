@@ -5,12 +5,12 @@ package processor
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"otoclone/config"
 	"otoclone/fsnotify"
 	"otoclone/rclone"
-	"otoclone/utils"
 
 	"github.com/bilyes/conman"
 )
@@ -37,7 +37,7 @@ func (p *Processor) Handle(event fsnotify.FSEvent, folders map[string]config.Fol
 		return "", []error{&UnwatchedError{event.Folder}}
 	}
 
-	if utils.ArrayContains(subject.IgnoreList, event.File) {
+	if slices.Contains(subject.IgnoreList, event.File) {
 		return "", nil
 	}
 

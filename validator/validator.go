@@ -6,6 +6,7 @@ package validator
 import (
 	"fmt"
 	"os"
+	"slices"
 
 	"otoclone/config"
 	"otoclone/processor"
@@ -104,7 +105,7 @@ func (e *NoSuchDirectoryError) Error() string {
 
 func validateStrategies(strats []string) error {
 	for _, s := range strats {
-		if !utils.ArrayContains(strategies, s) {
+		if !slices.Contains(strategies, s) {
 			return &processor.UnknownBackupStrategyError{Strategy: s}
 		}
 	}
@@ -112,7 +113,7 @@ func validateStrategies(strats []string) error {
 }
 
 func validateStrategy(strat string) error {
-	if !utils.ArrayContains(strategies, strat) {
+	if !slices.Contains(strategies, strat) {
 		return &processor.UnknownBackupStrategyError{Strategy: strat}
 	}
 	return nil
@@ -147,10 +148,9 @@ func validatePath(path string) error {
 	if ok, err := utils.PathExists(path); !ok {
 		if err == nil {
 			return &NoSuchDirectoryError{path}
-		} else {
-			fmt.Println("Error:", err)
-			os.Exit(1)
 		}
+		fmt.Println("Error:", err)
+		os.Exit(1)
 	}
 	return nil
 }
