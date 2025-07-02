@@ -4,6 +4,7 @@
 package fsnotify
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -30,16 +31,24 @@ func Watch(folders []string) (FSEvent, error) {
 		return FSEvent{}, err
 	}
 
-	return parseEvent(stdout), nil
+	event, err := parseEvent(stdout)
+	if err != nil {
+		return FSEvent{}, err
+	}
+
+	return event, nil
 }
 
-func parseEvent(output []byte) FSEvent {
+func parseEvent(output []byte) (FSEvent, error) {
 	event := strings.Split(string(output), " ")
+	if len(event) < 3 {
+		return FSEvent{}, fmt.Errorf("Unable to parse event: %s", string(output))
+	}
 	event[2] = strings.TrimSuffix(event[2], "\n")
 
 	return FSEvent{
 		Folder: event[0],
 		Event:  event[1],
 		File:   event[2],
-	}
+	}, nil
 }
