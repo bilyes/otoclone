@@ -4,6 +4,7 @@
 package processor
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -56,7 +57,7 @@ type cloningTask struct {
 	strategy        string
 }
 
-func (c *cloningTask) Execute() (any, error) {
+func (c *cloningTask) Execute(ctx context.Context) (any, error) {
 	switch c.strategy {
 	case "copy":
 		return nil, c.cloner.Copy(c.source, c.destinationPath, c.destination, c.flags)
@@ -79,6 +80,9 @@ func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []err
 	}
 	cm := conman.New[any](concurrency)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	for _, folder := range folders {
 
 		flags := rclone.Flags{
@@ -88,6 +92,7 @@ func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []err
 
 		for _, remote := range folder.Remotes {
 			cm.Run(
+				ctx,
 				&cloningTask{
 					cloner:          p.Cloner,
 					source:          folder.Path,
