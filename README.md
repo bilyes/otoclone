@@ -124,7 +124,10 @@ restart it if it ever fails. Here's an example of how to accomplish this.
    
    [Unit]
    Description=Automatic backup
-   After=network.target
+   # Wait for network connection and
+   # domain name resolution availability
+   Wants=network-online.target
+   After=network-online.target nss-lookup.target
 
    [Service]
    Type=simple
