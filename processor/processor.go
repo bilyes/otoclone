@@ -22,7 +22,12 @@ type Processor struct {
 }
 
 // Handles a FSNotify Event
-func (p *Processor) Handle(event fsnotify.FSEvent, folders map[string]config.Folder, verbose bool) (string, []error) {
+func (p *Processor) Handle(
+	ctx context.Context,
+	event fsnotify.FSEvent,
+	folders map[string]config.Folder,
+	verbose bool,
+) (string, []error, error) {
 	var subject config.Folder
 	var fKey string
 
@@ -35,17 +40,18 @@ func (p *Processor) Handle(event fsnotify.FSEvent, folders map[string]config.Fol
 	}
 
 	if subject.Path == "" {
-		return "", []error{&UnwatchedError{event.Folder}}
+		return "", []error{&UnwatchedError{event.Folder}}, nil
 	}
 
 	if slices.Contains(subject.IgnoreList, event.File) {
-		return "", nil
+		return "", nil, nil
 	}
 
 	flds := make(map[string]config.Folder)
 	flds[fKey] = subject
 
-	return subject.Path, p.Backup(flds, verbose)
+	errors, err := p.Backup(ctx, flds, verbose)
+	return subject.Path, errors, err
 }
 
 type cloningTask struct {
@@ -69,19 +75,24 @@ func (c *cloningTask) Execute(ctx context.Context) (any, error) {
 }
 
 // Backup a list of folders
-func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []error {
+func (p *Processor) Backup(ctx context.Context, folders map[string]config.Folder, verbose bool) ([]error, error) {
 	folderCount := len(folders)
 	if folderCount == 0 {
-		return nil
+		return nil, nil
 	}
 	concurrency := p.Concurrency
 	if concurrency <= 0 {
 		concurrency = int64(folderCount)
 	}
-	cm := conman.New[any](concurrency)
+	if concurrency < 2 {
+		// conman requires at least 2 concurrency
+		concurrency = 2
+	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	cm, err := conman.New[any](concurrency)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, folder := range folders {
 
@@ -105,9 +116,11 @@ func (p *Processor) Backup(folders map[string]config.Folder, verbose bool) []err
 		}
 	}
 
-	cm.Wait()
+	if err := cm.Wait(ctx); err != nil {
+		return nil, err
+	}
 
-	return cm.Errors()
+	return cm.Errors(), nil
 }
 
 type UnknownBackupStrategyError struct {

@@ -43,7 +43,12 @@ func backup(cmd *cobra.Command, args []string) {
 		folders = map[string]config.Folder{folder: fol}
 	}
 
-	if errs := proc.Backup(folders, verbose); len(errs) > 0 {
+	errs, err := proc.Backup(cmd.Context(), folders, verbose)
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+	if len(errs) > 0 {
 		for _, e := range errs {
 			fmt.Println("Error:", e)
 		}
