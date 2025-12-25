@@ -1,10 +1,10 @@
 module otoclone
 
-go 1.24.4
+go 1.25
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/bilyes/conman v0.2.0
+	github.com/bilyes/conman v0.4.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.20.1

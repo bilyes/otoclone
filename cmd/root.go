@@ -60,7 +60,11 @@ func watch(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 
-		path, errors := proc.Handle(event, folders, verbose)
+		path, errors, err := proc.Handle(cmd.Context(), event, folders, verbose)
+		if err != nil {
+			fmt.Println("Error:", err)
+			continue
+		}
 
 		if errors != nil {
 			fmt.Println("Errors:")

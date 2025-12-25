@@ -9,6 +9,7 @@ import (
 )
 
 func TestHandleIgnoreList(t *testing.T) {
+	t.Parallel()
 	folders := buildForlders([]string{"ignoreme.txt"}, "copy")
 
 	event := fsnotify.FSEvent{
@@ -21,7 +22,10 @@ func TestHandleIgnoreList(t *testing.T) {
 	mockCloner.On("RemoteIsValid", "Foo").Return(true, nil).Once()
 	testProc := &Processor{Cloner: mockCloner, Concurrency: 1}
 
-	p, errs := testProc.Handle(event, folders, false)
+	p, errs, err := testProc.Handle(t.Context(), event, folders, false)
+	if err != nil {
+		t.Errorf("No error expected, got %v", err)
+	}
 
 	if errs != nil {
 		t.Errorf("No errors expected, got %v", errs)
@@ -33,6 +37,7 @@ func TestHandleIgnoreList(t *testing.T) {
 }
 
 func TestHandleUnknownBackupStrategy(t *testing.T) {
+	t.Parallel()
 	folders := buildForlders([]string{}, "sleep")
 
 	event := fsnotify.FSEvent{
@@ -45,7 +50,10 @@ func TestHandleUnknownBackupStrategy(t *testing.T) {
 	mockCloner.On("RemoteIsValid", "Foo").Return(true, nil).Once()
 	testProc := &Processor{Cloner: mockCloner}
 
-	_, errs := testProc.Handle(event, folders, false)
+	_, errs, err := testProc.Handle(t.Context(), event, folders, false)
+	if err != nil {
+		t.Errorf("No error expected, got %v", err)
+	}
 
 	if errs == nil {
 		t.Error("Expected UnknownBackupStrategy error, got nil")
@@ -53,6 +61,7 @@ func TestHandleUnknownBackupStrategy(t *testing.T) {
 }
 
 func TestHandleUnwatched(t *testing.T) {
+	t.Parallel()
 	folders := buildForlders([]string{}, "copy")
 
 	event := fsnotify.FSEvent{
@@ -65,7 +74,10 @@ func TestHandleUnwatched(t *testing.T) {
 	mockCloner.On("RemoteIsValid", "Foo").Return(true, nil).Once()
 	testProc := &Processor{Cloner: mockCloner}
 
-	_, errs := testProc.Handle(event, folders, false)
+	_, errs, err := testProc.Handle(t.Context(), event, folders, false)
+	if err != nil {
+		t.Errorf("No error expected, got %v", err)
+	}
 
 	if errs == nil {
 		t.Error("Expected Unwatched error, got nil")
